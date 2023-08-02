@@ -1,0 +1,39 @@
+#include<Servo.h>
+Servo myServo;
+
+const int servo = 9;
+const int Flex = A0;
+const float VCC = 5; // Measured voltage of Ardunio 5V line
+const float R_DIV = 120000.0; // Measured resistance of  resistor
+const float STRAIGHT_RESISTANCE = 25000.0; // resistance when straight
+const float BEND_RESISTANCE = 125000.0; // resistance at 90 deg
+int flexValue;
+int a;
+
+void setup() {
+  
+myServo.attach(servo);
+Serial.begin(9600);
+pinMode(Flex, INPUT); 
+
+}
+
+void loop() {
+// Read the ADC, and calculate voltage and resistance from it
+flexValue = analogRead(Flex);
+Serial.println(flexValue);
+float flexV = flexValue * VCC / 1023.0;
+float flexR = R_DIV * (VCC / flexV - 1.0);
+Serial.println("Resistance: " + String(flexR) + " ohms");
+
+// Use the calculated resistance to estimate the sensor's bend angle:
+float angle = map(flexR, STRAIGHT_RESISTANCE, BEND_RESISTANCE, 0, 90.0);
+Serial.println("Bend: " + String(angle) + " degrees");
+Serial.println("Voltage: " + String(flexV) + "Volts");
+Serial.println();
+
+a = map(flexValue, 100, 300, 0, 180);
+myServo.write(a);
+delay(200);
+
+}
